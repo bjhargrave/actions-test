@@ -38,6 +38,7 @@ jobs:
     - name: Publish
       run: |
         ./.github/scripts/publish.sh -Plocal
+        ls -Rl target/repo/
     - name: Upload Generated Repo
       uses: actions/upload-artifact@v2
       with:
