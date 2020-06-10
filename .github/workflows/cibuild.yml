@@ -16,7 +16,9 @@ jobs:
     steps:
     - name: Check Publish
       id: check_publish
-      run: echo "::set-output name=publish::${{ (github.repository == 'bjhargrave/actions-test') && (github.ref == 'refs/heads/master') && (github.event_name != 'pull_request') }}"
+      run: echo "::set-output name=publish::${{ (env.GPG_PRIVATE_KEY != null) && (github.ref == 'refs/heads/master') && (github.event_name != 'pull_request') }}"
+      env:
+        GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
     - name: Import GPG key
       continue-on-error: true
       id: import_gpg
