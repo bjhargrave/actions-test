@@ -15,17 +15,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Import GPG key
-      id: import_gpg
+      continue-on-error: true
+      id: importgpg
       uses: crazy-max/ghaction-import-gpg@v2
       env:
         GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
         PASSPHRASE: ${{ secrets.PASSPHRASE }}
     - name: GPG user IDs
+      if: (steps.importgpg.outcome == 'success')
       run: |
-        echo "fingerprint: ${{ steps.import_gpg.outputs.fingerprint }}"
-        echo "keyid:       ${{ steps.import_gpg.outputs.keyid }}"
-        echo "name:        ${{ steps.import_gpg.outputs.name }}"
-        echo "email:       ${{ steps.import_gpg.outputs.email }}"
+        echo "fingerprint: ${{ steps.importgpg.outputs.fingerprint }}"
+        echo "keyid:       ${{ steps.importgpg.outputs.keyid }}"
+        echo "name:        ${{ steps.importgpg.outputs.name }}"
+        echo "email:       ${{ steps.importgpg.outputs.email }}"
     - name: Git Checkout
       uses: actions/checkout@v2
     - name: Set up Java
