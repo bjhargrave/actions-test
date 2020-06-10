@@ -1,0 +1,33 @@
+name: CI Build
+
+on: [push, pull_request]
+
+env:
+  LC_ALL: en_US.UTF-8
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  OpenJDK8_Linux:
+    name: OpenJDK8 Linux
+    runs-on: ubuntu-latest
+    steps:
+    - name: Git Checkout
+      uses: actions/checkout@v2
+    - name: Set up Java
+      uses: actions/setup-java@v1
+      with:
+        java-version: 8
+    - name: Build
+      run: |
+        ./.github/scripts/build.sh
+    - name: Publish
+      run: |
+        ./.github/scripts/publish.sh -Plocal
+    - name: Upload Generated Repo
+      uses: actions/upload-artifact@v2
+      with:
+        name: Generated-Repo
+        path: target/repo/
