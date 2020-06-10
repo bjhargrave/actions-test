@@ -14,19 +14,23 @@ jobs:
     name: OpenJDK8 Linux
     runs-on: ubuntu-latest
     steps:
+    - name: Check Publish
+      id: check_publish
+      run: echo "::set-output name=publish::${{ (github.repository == 'bjhargrave/actions-test') && (github.ref == 'refs/heads/master') && (github.event_name != 'pull_request') }}"
     - name: Import GPG key
       continue-on-error: true
-      id: importgpg
+      id: import_gpg
       uses: crazy-max/ghaction-import-gpg@v2
       env:
         GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
     - name: GPG user IDs
-      if: (steps.importgpg.outcome == 'success')
+      if: (steps.import_gpg.outcome == 'success')
       run: |
-        echo "fingerprint: ${{ steps.importgpg.outputs.fingerprint }}"
-        echo "keyid:       ${{ steps.importgpg.outputs.keyid }}"
-        echo "name:        ${{ steps.importgpg.outputs.name }}"
-        echo "email:       ${{ steps.importgpg.outputs.email }}"
+        echo "publish: ${{ steps.check_publish.outputs.publish }}"
+        echo "fingerprint: ${{ steps.import_gpg.outputs.fingerprint }}"
+        echo "keyid:       ${{ steps.import_gpg.outputs.keyid }}"
+        echo "name:        ${{ steps.import_gpg.outputs.name }}"
+        echo "email:       ${{ steps.import_gpg.outputs.email }}"
     - name: Git Checkout
       uses: actions/checkout@v2
     - name: Set up Java
