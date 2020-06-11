@@ -14,7 +14,7 @@ jobs:
     name: OpenJDK8 Linux
     runs-on: ubuntu-latest
     env:
-      CANONICAL: ${{ (github.ref == 'refs/heads/master') && (github.event_name != 'pull_request') }}
+      CANONICAL: ${{ (github.repository == 'bjhargrave/actions-test') && (github.ref == 'refs/heads/master') && (github.event_name != 'pull_request') }}
     steps:
     - name: Git Checkout
       uses: actions/checkout@v2
@@ -26,22 +26,13 @@ jobs:
       id: build
       run: |
         ./.github/scripts/build.sh
-    - name: Post Build
-      id: post_build
-      if: (steps.build.conclusion == 'success') && (env.CANONICAL == 'true')
-      run: |
-        echo "::set-output name=publish::${{ (env.OSSRH_USERNAME != null) }}"
-        echo "::set-output name=gpgkey::${{ (env.GPG_PRIVATE_KEY != null) }}"
-      env:
-        OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
-        GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
     - name: Import GPG key
       id: import_gpg
-      if: (steps.post_build.outputs.gpgkey == 'true')
+      if: (env.CANONICAL == 'true')
       uses: crazy-max/ghaction-import-gpg@v2
       env:
         GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
-        PASSPHRASE: ${{ secrets.PASSPHRASE }}
+        PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
     - name: GPG key information
       if: (steps.import_gpg.outcome == 'success')
       run: |
@@ -51,7 +42,7 @@ jobs:
         echo "email:       ${{ steps.import_gpg.outputs.email }}"
     - name: Publish
       id: publish
-      if: (steps.post_build.outputs.publish == 'true')
+      if: (env.CANONICAL == 'true')
       run: |
         ./.github/scripts/publish.sh -Plocal
         ls -Rl target/repo/
