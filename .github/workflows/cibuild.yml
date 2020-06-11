@@ -26,9 +26,9 @@ jobs:
         ./.github/scripts/build.sh
     - name: Post Build
       id: post_build
-      if: (steps.build.conclusion == 'success')
+      if: (steps.build.conclusion == 'success') && (github.ref == 'refs/heads/master') && (github.event_name != 'pull_request')
       run: |
-        echo "::set-output name=publish::${{ (env.OSSRH_USERNAME != null) && (github.ref == 'refs/heads/master') && (github.event_name != 'pull_request') }}"
+        echo "::set-output name=publish::${{ (env.OSSRH_USERNAME != null) }}"
         echo "::set-output name=gpgkey::${{ (env.GPG_PRIVATE_KEY != null) }}"
       env:
         OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
