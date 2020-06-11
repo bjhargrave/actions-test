@@ -27,6 +27,12 @@ jobs:
     name: JDK${{ matrix.java }} ${{ matrix.os }} ${{ matrix.canonical }}
     runs-on: ${{ matrix.os }}
     steps:
+    - name: Check GPG key
+      run: |
+        echo "${{ contains( env.GPG_PRIVATE_KEY, 'BEGIN PGP PRIVATE KEY BLOCK' ) }}"
+      env:
+        GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
+        PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
     - name: Git Checkout
       uses: actions/checkout@v2
     - name: Set up Java
