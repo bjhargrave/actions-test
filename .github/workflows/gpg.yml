@@ -32,6 +32,7 @@ jobs:
       uses: crazy-max/ghaction-import-gpg@v2
       env:
         GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
+        PASSPHRASEX: ${{ secrets.GPG_PASSPHRASE }}
     - name: GPG key information
       run: |
         echo "fingerprint: ${{ steps.import_gpg.outputs.fingerprint }}"
@@ -52,4 +53,4 @@ jobs:
         echo $HEXPASS
       env:
         GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
-        PASSPHRASE: simple-pass-phrase
+        PASSPHRASE: <&xxx"yyy'>
