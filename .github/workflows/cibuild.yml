@@ -25,20 +25,20 @@ jobs:
       run: |
         ./.github/scripts/build.sh
     - name: Publish Check
-      if: (steps.build.conclusion == 'success')
       id: publish_check
-      run: echo "::set-output name=publish::${{ (env.GPG_PRIVATE_KEY != null) && (github.ref == 'refs/heads/master') && (github.event_name != 'pull_request') }}"
+      if: (steps.build.conclusion == 'success')
+      run: |
+        echo "::set-output name=publish::${{ (github.ref == 'refs/heads/master') && (github.event_name != 'pull_request') }}"
+        echo "::set-output name=gpgkey::${{ (env.GPG_PRIVATE_KEY != null) }}"
       env:
         GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
-    - name: Publish Check Result
-      run: |
-        echo "publish: ${{ steps.publish_check.outputs.publish }}"
     - name: Import GPG key
-      if: (steps.publish_check.outputs.publish == 'true')
       id: import_gpg
+      if: (steps.publish_check.outputs.gpgkey == 'true')
       uses: crazy-max/ghaction-import-gpg@v2
       env:
         GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
+        PASSPHRASE: ${{ secrets.PASSPHRASE }}
     - name: GPG user IDs
       if: (steps.import_gpg.outcome == 'success')
       run: |
@@ -47,10 +47,14 @@ jobs:
         echo "name:        ${{ steps.import_gpg.outputs.name }}"
         echo "email:       ${{ steps.import_gpg.outputs.email }}"
     - name: Publish
-      if: (steps.build.conclusion == 'success') && (steps.publish_check.outputs.publish == 'true')
+      id: publish
+      if: (steps.publish_check.outputs.publish == 'true')
       run: |
         ./.github/scripts/publish.sh -Plocal
         ls -Rl target/repo/
+      env:
+        OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
+        OSSRH_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
     - name: Upload Generated Repo
       uses: actions/upload-artifact@v2
       with:
