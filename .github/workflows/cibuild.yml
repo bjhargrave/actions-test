@@ -13,6 +13,8 @@ jobs:
   OpenJDK8_Linux:
     name: OpenJDK8 Linux
     runs-on: ubuntu-latest
+    env:
+      CANONICAL: ${{ (github.ref == 'refs/heads/master') && (github.event_name != 'pull_request') }}
     steps:
     - name: Git Checkout
       uses: actions/checkout@v2
@@ -20,19 +22,16 @@ jobs:
       uses: actions/setup-java@v1
       with:
         java-version: 8
-    - name: Pre Build
-      id: pre_build
-      run: |
-        echo "::set-output name=canoncial::${{ (github.ref == 'refs/heads/master') && (github.event_name != 'pull_request') }}"
     - name: Build
       id: build
       run: |
         ./.github/scripts/build.sh
     - name: Post Build
       id: post_build
+      if: (steps.build.conclusion == 'success') && (env.CANONICAL == 'true')
       run: |
-        echo "::set-output name=publish::${{ (steps.build.conclusion == 'success') && (steps.pre_build.outputs.canoncial == 'true') && (env.OSSRH_USERNAME != null) }}"
-        echo "::set-output name=gpgkey::${{ (steps.build.conclusion == 'success') && (steps.pre_build.outputs.canoncial == 'true') && (env.GPG_PRIVATE_KEY != null) }}"
+        echo "::set-output name=publish::${{ (env.OSSRH_USERNAME != null) }}"
+        echo "::set-output name=gpgkey::${{ (env.GPG_PRIVATE_KEY != null) }}"
       env:
         OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
         GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
