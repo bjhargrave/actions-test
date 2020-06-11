@@ -15,7 +15,6 @@ jobs:
       matrix:
         java: [ 8, 11 ]
         os: [ ubuntu-latest ]
-        canonical: [ false ]
         exclude:
         - os: ubuntu-latest
           java: 8
