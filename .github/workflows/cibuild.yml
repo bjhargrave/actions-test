@@ -28,9 +28,10 @@ jobs:
       id: publish_check
       if: (steps.build.conclusion == 'success')
       run: |
-        echo "::set-output name=publish::${{ (github.ref == 'refs/heads/master') && (github.event_name != 'pull_request') }}"
+        echo "::set-output name=publish::${{ (env.OSSRH_USERNAME != null) && (github.ref == 'refs/heads/master') && (github.event_name != 'pull_request') }}"
         echo "::set-output name=gpgkey::${{ (env.GPG_PRIVATE_KEY != null) }}"
       env:
+        OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
         GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
     - name: Import GPG key
       id: import_gpg
@@ -39,7 +40,7 @@ jobs:
       env:
         GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
         PASSPHRASE: ${{ secrets.PASSPHRASE }}
-    - name: GPG user IDs
+    - name: GPG key information
       if: (steps.import_gpg.outcome == 'success')
       run: |
         echo "fingerprint: ${{ steps.import_gpg.outputs.fingerprint }}"
