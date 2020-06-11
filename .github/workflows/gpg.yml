@@ -32,7 +32,6 @@ jobs:
       uses: crazy-max/ghaction-import-gpg@v2
       env:
         GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
-        PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
     - name: GPG key information
       run: |
         echo "fingerprint: ${{ steps.import_gpg.outputs.fingerprint }}"
@@ -40,3 +39,17 @@ jobs:
         echo "name:        ${{ steps.import_gpg.outputs.name }}"
         echo "email:       ${{ steps.import_gpg.outputs.email }}"
         gpg --list-keys
+    - name: GPG agent test
+      run: |
+        echo "default-cache-ttl 7200" >>/home/runner/.gnupg/gpg-agent.conf
+        echo "max-cache-ttl 31536000" >>/home/runner/.gnupg/gpg-agent.conf
+        echo "allow-preset-passphrase" >>/home/runner/.gnupg/gpg-agent.conf
+        cat /home/runner/.gnupg/gpg-agent.conf
+        gpg-connect-agent "RELOADAGENT" /bye
+        KEYGRIP=`gpg --batch --with-colons --with-keygrip --list-secret-keys ${{ steps.import_gpg.outputs.fingerprint }} | grep -m 1 grp | sed -E -e 's/(grp|:)//g'`
+        echo $KEYGRIP
+        HEXPASS=`echo -n '${{ env.PASSPHRASE }}' | xxd -pu`
+        echo $HEXPASS
+      env:
+        GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
+        PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
