@@ -3,10 +3,6 @@
   <interactiveMode>false</interactiveMode>
   <servers>
     <server>
-      <id>passphraseServerKey</id>
-      <passphrase>${env.PASSPHRASE}</passphrase>
-    </server>
-    <server>
       <id>ossrh</id>
       <username>${env.OSSRH_USERNAME}</username>
       <password>${env.OSSRH_PASSWORD}</password>

@@ -23,7 +23,6 @@ jobs:
       with:
         java-version: 8
     - name: Build
-      id: build
       run: |
         ./.github/scripts/build.sh
     - name: Import GPG key
@@ -41,7 +40,6 @@ jobs:
         echo "name:        ${{ steps.import_gpg.outputs.name }}"
         echo "email:       ${{ steps.import_gpg.outputs.email }}"
     - name: Publish
-      id: publish
       if: (env.CANONICAL == 'true')
       run: |
         ./.github/scripts/publish.sh -Plocal
