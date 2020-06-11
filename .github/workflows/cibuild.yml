@@ -11,10 +11,20 @@ defaults:
 
 jobs:
   OpenJDK8_Linux:
-    name: OpenJDK8 Linux
-    runs-on: ubuntu-latest
-    env:
-      CANONICAL: ${{ (github.repository == 'bjhargrave/actions-test') && (github.ref == 'refs/heads/master') && (github.event_name != 'pull_request') }}
+    strategy:
+      matrix:
+        java: [ 8, 11 ]
+        os: [ ubuntu-latest ]
+        canonical: [ false ]
+        exclude:
+        - os: ubuntu-latest
+          java: 8
+        include:
+        - os: ubuntu-latest
+          java: 8
+          canonical: ${{ (github.repository == 'bjhargrave/actions-test') && (github.ref == 'refs/heads/master') && (github.event_name != 'pull_request') }}
+    name: JDK${{ matrix.java }} ${{ matrix.os }} ${{ matrix.canonical }}
+    runs-on: ${{ matrix.os }}
     steps:
     - name: Git Checkout
       uses: actions/checkout@v2
@@ -27,7 +37,7 @@ jobs:
         ./.github/scripts/build.sh
     - name: Import GPG key
       id: import_gpg
-      if: (env.CANONICAL == 'true')
+      if: (matrix.canonical)
       uses: crazy-max/ghaction-import-gpg@v2
       env:
         GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
@@ -40,7 +50,7 @@ jobs:
         echo "name:        ${{ steps.import_gpg.outputs.name }}"
         echo "email:       ${{ steps.import_gpg.outputs.email }}"
     - name: Publish
-      if: (env.CANONICAL == 'true')
+      if: (matrix.canonical)
       run: |
         ./.github/scripts/publish.sh -Plocal
         ls -Rl target/repo/
