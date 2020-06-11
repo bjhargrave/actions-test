@@ -14,25 +14,6 @@ jobs:
     name: OpenJDK8 Linux
     runs-on: ubuntu-latest
     steps:
-    - name: Check Publish
-      id: check_publish
-      run: echo "::set-output name=publish::${{ (env.GPG_PRIVATE_KEY != null) && (github.ref == 'refs/heads/master') && (github.event_name != 'pull_request') }}"
-      env:
-        GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
-    - name: Import GPG key
-      continue-on-error: true
-      id: import_gpg
-      uses: crazy-max/ghaction-import-gpg@v2
-      env:
-        GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
-    - name: GPG user IDs
-      if: (steps.import_gpg.outcome == 'success')
-      run: |
-        echo "publish: ${{ steps.check_publish.outputs.publish }}"
-        echo "fingerprint: ${{ steps.import_gpg.outputs.fingerprint }}"
-        echo "keyid:       ${{ steps.import_gpg.outputs.keyid }}"
-        echo "name:        ${{ steps.import_gpg.outputs.name }}"
-        echo "email:       ${{ steps.import_gpg.outputs.email }}"
     - name: Git Checkout
       uses: actions/checkout@v2
     - name: Set up Java
@@ -40,9 +21,33 @@ jobs:
       with:
         java-version: 8
     - name: Build
+      id: build
       run: |
         ./.github/scripts/build.sh
+    - name: Publish Check
+      if: (steps.build.conclusion == 'success')
+      id: publish_check
+      run: echo "::set-output name=publish::${{ (env.GPG_PRIVATE_KEY != null) && (github.ref == 'refs/heads/master') && (github.event_name != 'pull_request') }}"
+      env:
+        GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
+    - name: Publish Check Result
+      run: |
+        echo "publish: ${{ steps.publish_check.outputs.publish }}"
+    - name: Import GPG key
+      if: (steps.publish_check.outputs.publish == 'true')
+      id: import_gpg
+      uses: crazy-max/ghaction-import-gpg@v2
+      env:
+        GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
+    - name: GPG user IDs
+      if: (steps.import_gpg.outcome == 'success')
+      run: |
+        echo "fingerprint: ${{ steps.import_gpg.outputs.fingerprint }}"
+        echo "keyid:       ${{ steps.import_gpg.outputs.keyid }}"
+        echo "name:        ${{ steps.import_gpg.outputs.name }}"
+        echo "email:       ${{ steps.import_gpg.outputs.email }}"
     - name: Publish
+      if: (steps.build.conclusion == 'success') && (steps.publish_check.outputs.publish == 'true')
       run: |
         ./.github/scripts/publish.sh -Plocal
         ls -Rl target/repo/
