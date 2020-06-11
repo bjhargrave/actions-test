@@ -1,6 +1,12 @@
 name: CI Build
 
-on: [push, pull_request]
+on:
+  push:
+    paths-ignore:
+    - '.github/**/*gpg*'
+  pull_request:
+    paths-ignore:
+    - '.github/**/*gpg*'
 
 env:
   LC_ALL: en_US.UTF-8
