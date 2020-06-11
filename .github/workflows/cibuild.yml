@@ -24,8 +24,8 @@ jobs:
       id: build
       run: |
         ./.github/scripts/build.sh
-    - name: Publish Check
-      id: publish_check
+    - name: Post Build
+      id: post_build
       if: (steps.build.conclusion == 'success')
       run: |
         echo "::set-output name=publish::${{ (env.OSSRH_USERNAME != null) && (github.ref == 'refs/heads/master') && (github.event_name != 'pull_request') }}"
@@ -35,7 +35,7 @@ jobs:
         GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
     - name: Import GPG key
       id: import_gpg
-      if: (steps.publish_check.outputs.gpgkey == 'true')
+      if: (steps.post_build.outputs.gpgkey == 'true')
       uses: crazy-max/ghaction-import-gpg@v2
       env:
         GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
@@ -49,7 +49,7 @@ jobs:
         echo "email:       ${{ steps.import_gpg.outputs.email }}"
     - name: Publish
       id: publish
-      if: (steps.publish_check.outputs.publish == 'true')
+      if: (steps.post_build.outputs.publish == 'true')
       run: |
         ./.github/scripts/publish.sh -Plocal
         ls -Rl target/repo/
