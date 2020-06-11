@@ -29,7 +29,8 @@ jobs:
     steps:
     - name: Check GPG key
       run: |
-        echo "${{ contains( env.GPG_PRIVATE_KEY, 'BEGIN PGP PRIVATE KEY BLOCK' ) }}"
+        echo "${{ startsWith( env.GPG_PRIVATE_KEY, '-----BEGIN PGP PRIVATE KEY BLOCK-----' ) }} : GPG key is a private key"
+        echo "${{ startsWith( env.GPG_PRIVATE_KEY, '-----BEGIN PGP PUBLIC KEY BLOCK-----' ) }} : GPG key is a public key"
       env:
         GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
         PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
