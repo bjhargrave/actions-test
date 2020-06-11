@@ -32,8 +32,8 @@ jobs:
       uses: crazy-max/ghaction-import-gpg@v2
       env:
         GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
+        PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
     - name: GPG key information
-      if: (steps.import_gpg.outcome == 'success')
       run: |
         echo "fingerprint: ${{ steps.import_gpg.outputs.fingerprint }}"
         echo "keyid:       ${{ steps.import_gpg.outputs.keyid }}"
