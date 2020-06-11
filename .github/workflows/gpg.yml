@@ -1,4 +1,4 @@
-name: CI Build
+name: GPG
 
 on:
   push:
@@ -29,7 +29,6 @@ jobs:
         PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
     - name: Import GPG key
       id: import_gpg
-      if: (matrix.canonical)
       uses: crazy-max/ghaction-import-gpg@v2
       env:
         GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
