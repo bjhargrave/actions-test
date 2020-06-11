@@ -52,4 +52,4 @@ jobs:
         echo $HEXPASS
       env:
         GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
-        PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+        PASSPHRASE: simple-pass-phrase
