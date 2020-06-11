@@ -59,6 +59,7 @@ jobs:
         OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
         OSSRH_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
     - name: Upload Generated Repo
+      if: (matrix.canonical)
       uses: actions/upload-artifact@v2
       with:
         name: Generated-Repo
