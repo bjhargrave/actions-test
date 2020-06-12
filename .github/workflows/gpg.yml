@@ -29,10 +29,10 @@ jobs:
         PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
     - name: Import GPG key
       id: import_gpg
-      uses: crazy-max/ghaction-import-gpg@v2
+      uses: bjhargrave/ghaction-import-gpg@master
       env:
         GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
-        PASSPHRASEX: ${{ secrets.GPG_PASSPHRASE }}
+        PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
     - name: GPG key information
       run: |
         echo "fingerprint: ${{ steps.import_gpg.outputs.fingerprint }}"
@@ -49,7 +49,7 @@ jobs:
         gpg-connect-agent "RELOADAGENT" /bye
         KEYGRIP=`gpg --batch --with-colons --with-keygrip --list-secret-keys ${{ steps.import_gpg.outputs.fingerprint }} | grep -m 1 grp | sed -E -e 's/(grp|:)//g'`
         echo $KEYGRIP
-        HEXPASS=`echo -n '${{ env.PASSPHRASE }}' | xxd -pu`
+        HEXPASS=`xxd -pu <<< ${{ env.PASSPHRASE }}`
         echo $HEXPASS
       env:
         GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
