@@ -29,6 +29,7 @@ jobs:
           java: 8
         - os: ubuntu-latest
           java: 8
+          fetch-depth: '0'
           canonical: ${{ (github.repository == 'bjhargrave/actions-test') && (github.ref == 'refs/heads/master') && (github.event_name != 'pull_request') }}
     name: JDK${{ matrix.java }} ${{ matrix.os }} ${{ matrix.canonical }}
     runs-on: ${{ matrix.os }}
@@ -42,6 +43,8 @@ jobs:
         PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
     - name: Git Checkout
       uses: actions/checkout@v2
+      with:
+        fetch-depth: ${{ matrix.fetch-depth }}
     - name: Set up Java
       uses: actions/setup-java@v1
       with:
