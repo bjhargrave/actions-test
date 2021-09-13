@@ -16,20 +16,19 @@ defaults:
     shell: bash
 
 jobs:
-  OpenJDK8_Linux:
+  build:
     strategy:
       matrix:
-        java: [ 8, 11, 14, 15-ea, 16-ea ]
-        os: [ ubuntu-latest ]
+        os: [ 'ubuntu-latest' ]
+        java: [ '8', '11', '16' ]
         exclude:
-        - os: ubuntu-latest
-          java: 8
+        - os: 'ubuntu-latest'
+          java: '8'
         include:
-        - os: windows-latest
-          java: 8
-        - os: ubuntu-latest
-          java: 8
-          fetch-depth: '0'
+        - os: 'windows-latest'
+          java: '8'
+        - os: 'ubuntu-latest'
+          java: '8'
           canonical: ${{ (github.repository == 'bjhargrave/actions-test') && (github.ref == 'refs/heads/master') && (github.event_name != 'pull_request') }}
     name: JDK${{ matrix.java }} ${{ matrix.os }} ${{ matrix.canonical }}
     runs-on: ${{ matrix.os }}
@@ -37,21 +36,18 @@ jobs:
     - name: Env1
       run: |
         set
-    - name: Check GPG key
-      run: |
-        echo "${{ startsWith( env.GPG_PRIVATE_KEY, '-----BEGIN PGP PRIVATE KEY BLOCK-----' ) }} : GPG key is a private key"
-        echo "${{ startsWith( env.GPG_PRIVATE_KEY, '-----BEGIN PGP PUBLIC KEY BLOCK-----' ) }} : GPG key is a public key"
-      env:
-        GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
-        PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
     - name: Git Checkout
       uses: actions/checkout@v2
+    - name: Set up Java ${{ matrix.java }}
+      uses: actions/setup-java@v2
       with:
-        fetch-depth: ${{ matrix.fetch-depth }}
-    - name: Set up Java
-      uses: actions/setup-java@v1
-      with:
-        java-version: 8
+        distribution: 'temurin'
+        java-version: ${{ matrix.java }}
+        server-id: ossrh
+        server-username: OSSRH_USERNAME
+        server-password: OSSRH_PASSWORD
+        gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }}
+        gpg-passphrase: GPG_PASSPHRASE
     - name: Env2
       run: |
         set
@@ -60,22 +56,8 @@ jobs:
         ./.github/scripts/build.sh
       env:
         CANONICAL: ${{ matrix.canonical }}
-    - name: Import GPG key
-      id: import_gpg
-      if: (matrix.canonical)
-      uses: crazy-max/ghaction-import-gpg@v3
-      with:
-        gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }}
-        passphrase: ${{ secrets.GPG_PASSPHRASE }}
-    - name: GPG key information
-      if: (steps.import_gpg.outcome == 'success')
-      run: |
-        echo "fingerprint: ${{ steps.import_gpg.outputs.fingerprint }}"
-        echo "keyid:       ${{ steps.import_gpg.outputs.keyid }}"
-        echo "name:        ${{ steps.import_gpg.outputs.name }}"
-        echo "email:       ${{ steps.import_gpg.outputs.email }}"
     - name: Publish
-      if: (matrix.canonical)
+      if: ${{ matrix.canonical }}
       run: |
         ./.github/scripts/publish.sh -Plocal
         ls -Rl target/repo/
@@ -83,7 +65,7 @@ jobs:
         OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
         OSSRH_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
     - name: Upload Generated Repo
-      if: (matrix.canonical)
+      if: ${{ matrix.canonical }}
       uses: actions/upload-artifact@v2
       with:
         name: Generated-Repo
