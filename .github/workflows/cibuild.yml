@@ -51,6 +51,7 @@ jobs:
         gpg-passphrase: GPG_PASSPHRASE
     - name: Env2
       run: |
+        cat /home/runner/.m2/settings.xml
         set
     - name: Build
       run: |
@@ -63,6 +64,7 @@ jobs:
         ./.github/scripts/publish.sh -Plocal
         ls -Rl target/repo/
       env:
+        GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
         OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
         OSSRH_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
     - name: Upload Generated Repo
