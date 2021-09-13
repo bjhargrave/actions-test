@@ -52,6 +52,9 @@ jobs:
     - name: Env2
       run: |
         cat /home/runner/.m2/settings.xml
+        echo ''
+        gpg --list-secret-keys --keyid-format=long --with-keygrip --with-colons
+        echo ''
         set
     - name: Build
       run: |
