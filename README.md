@@ -1,4 +1,4 @@
 # actions-test
 Testing GitHub Actions
 
-A change.
+A change. Another change.
