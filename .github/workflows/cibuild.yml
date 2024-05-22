@@ -36,6 +36,9 @@ jobs:
     name: JDK${{ matrix.java }} ${{ matrix.os }} ${{ matrix.canonical }}
     runs-on: ${{ matrix.os }}
     steps:
+    - name: "Debug info"
+      run: |
+        jq '.' "$GITHUB_EVENT_PATH"
     - name: Env1
       run: |
         set
