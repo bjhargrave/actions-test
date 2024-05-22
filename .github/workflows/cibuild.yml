@@ -1,5 +1,7 @@
 name: CI Build
 
+run-name: ${{ github.event.workflow_run.display_title || github.workflow }}
+
 on:
   push:
     paths-ignore:
