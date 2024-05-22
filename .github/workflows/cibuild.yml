@@ -1,6 +1,7 @@
 name: CI Build
 
-run-name: ${{ github.event.timestamp || github.workflow }}
+run-name: Run Name
+#run-name: ${{ github.event.timestamp || github.workflow }}
 
 on:
   push:
